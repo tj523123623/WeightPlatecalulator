@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#252a2e">
+  <title>Full Plate Weight & Creation Calculator</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <main class="app-shell">
+    <header class="app-header">
+      <div class="header-copy">
+        <p class="eyebrow">Plate Builder</p>
+        <h1 data-i18n="title">Full Plate Weight & Creation Calculator</h1>
+        <p data-i18n="subtitle">Create a plate size from a target weight, or calculate weight from existing dimensions.</p>
+      </div>
+
+      <div class="language-toggle" aria-label="Language">
+        <button id="btn-en" class="language-button is-active" type="button" data-lang="en">EN</button>
+        <button id="btn-si" class="language-button" type="button" data-lang="si">සිංහල</button>
+      </div>
+    </header>
+
+    <div class="app-grid">
+      <form id="calculator" class="control-panel" novalidate>
+        <div class="choice-grid two-columns">
+          <fieldset class="field-set">
+            <legend data-i18n="calcModeLabel">Calculator Mode</legend>
+            <div class="choice-row">
+              <label>
+                <input class="choice-input" type="radio" name="calcMode" value="create" checked>
+                <span class="choice-label" data-i18n="modeCreate">Create from Weight</span>
+              </label>
+              <label>
+                <input class="choice-input" type="radio" name="calcMode" value="weight">
+                <span class="choice-label" data-i18n="modeWeight">Weight from Size</span>
+              </label>
+            </div>
+          </fieldset>
+
+          <fieldset class="field-set">
+            <legend data-i18n="shapeModeLabel">Plate Shape</legend>
+            <div class="choice-row">
+              <label>
+                <input class="choice-input" type="radio" name="shapeMode" value="solid" checked>
+                <span class="choice-label" data-i18n="shapeSolid">Solid Plate</span>
+              </label>
+              <label>
+                <input class="choice-input" type="radio" name="shapeMode" value="hole">
+                <span class="choice-label" data-i18n="shapeHole">Center Hole</span>
+              </label>
+            </div>
+          </fieldset>
+        </div>
+
+        <section class="input-section" aria-label="Material settings">
+          <div class="responsive-grid four-columns">
+            <label class="field">
+              <span data-i18n="materialLabel">Material</span>
+              <select id="material">
+                <option value="7200" data-i18n="matCastIron">Cast Iron</option>
+                <option value="7850" data-i18n="matSteel">Steel</option>
+                <option value="2700" data-i18n="matAluminum">Aluminum</option>
+                <option value="8900" data-i18n="matCopper">Copper</option>
+                <option value="custom" data-i18n="matCustom" selected>Custom Density</option>
+              </select>
+            </label>
+
+            <label class="field">
+              <span data-i18n="densityLabel">Density (kg/m³)</span>
+              <input id="density" type="number" value="0" min="0" step="1" inputmode="decimal">
+            </label>
+
+            <label class="field">
+              <span data-i18n="allowanceLabel">Casting Allowance (%)</span>
+              <input id="allowance" type="number" value="0" min="0" step="0.1" inputmode="decimal">
+            </label>
+
+            <label class="field">
+              <span data-i18n="unitsLabel">Units</span>
+              <select id="units">
+                <option value="cm" data-i18n="unitCm" selected>Centimeters</option>
+                <option value="mm" data-i18n="unitMm">Millimeters</option>
+                <option value="in" data-i18n="unitIn">Inches</option>
+              </select>
+            </label>
+          </div>
+        </section>
+
+        <section id="createPanel" class="input-section" aria-label="Create from weight">
+          <div class="responsive-grid two-columns">
+            <label class="field field-large">
+              <span data-i18n="targetMassLabel">Target Weight (kg)</span>
+              <input id="targetMass" type="number" value="0" min="0" step="0.1" inputmode="decimal">
+            </label>
+
+            <fieldset class="field-set compact">
+              <legend data-i18n="solveForLabel">Solve For</legend>
+              <div class="choice-row">
+                <label>
+                  <input class="choice-input" type="radio" name="solveMode" value="diameter" checked>
+                  <span class="choice-label" data-i18n="solveDiameter">Find Diameter</span>
+                </label>
+                <label>
+                  <input class="choice-input" type="radio" name="solveMode" value="thickness">
+                  <span class="choice-label" data-i18n="solveThickness">Find Thickness</span>
+                </label>
+              </div>
+            </fieldset>
+          </div>
+
+          <div class="responsive-grid three-columns">
+            <label id="fixedThicknessWrap" class="field">
+              <span data-i18n="fixedThicknessLabel">Fixed Thickness</span>
+              <input id="fixedThickness" type="number" value="0" min="0" step="0.1" inputmode="decimal">
+            </label>
+
+            <label id="fixedDiameterWrap" class="field hidden">
+              <span data-i18n="fixedDiameterLabel">Fixed Diameter</span>
+              <input id="fixedDiameter" type="number" value="0" min="0" step="0.1" inputmode="decimal">
+            </label>
+
+            <label id="holeWrapCreate" class="field hidden">
+              <span data-i18n="holeLabel">Center Hole Diameter</span>
+              <input id="holeDiameterCreate" type="number" value="0" min="0" step="0.1" inputmode="decimal">
+            </label>
+          </div>
+        </section>
+
+        <section id="weightPanel" class="input-section hidden" aria-label="Weight from size">
+          <div class="responsive-grid three-columns">
+            <label class="field">
+              <span data-i18n="outerDiameterLabel">Outer Diameter</span>
+              <input id="outerDiameterWeight" type="number" value="0" min="0" step="0.1" inputmode="decimal">
+            </label>
+
+            <label class="field">
+              <span data-i18n="thicknessLabel">Thickness</span>
+              <input id="thicknessWeight" type="number" value="0" min="0" step="0.1" inputmode="decimal">
+            </label>
+
+            <label id="holeWrapWeight" class="field hidden">
+              <span data-i18n="holeLabel2">Center Hole Diameter</span>
+              <input id="holeDiameterWeight" type="number" value="0" min="0" step="0.1" inputmode="decimal">
+            </label>
+          </div>
+        </section>
+
+        <section class="result-grid" aria-label="Calculation results">
+          <div class="result-panel">
+            <p data-i18n="mainResultLabel">Main Result</p>
+            <strong id="mainResult">0</strong>
+            <span id="mainDetail">Enter values to calculate the plate.</span>
+          </div>
+
+          <div class="summary-panel">
+            <p data-i18n="calcSummaryLabel">Calculation Summary</p>
+            <dl class="summary-list">
+              <div><dt data-i18n="lblNetWeight">Net Weight</dt><dd id="sumNetWeight">0.000 kg</dd></div>
+              <div><dt data-i18n="lblGrossWeight">Gross Weight</dt><dd id="sumGrossWeight">0.000 kg</dd></div>
+              <div><dt data-i18n="lblVolume">Volume</dt><dd id="sumVolume">0.000 cm³</dd></div>
+              <div><dt data-i18n="lblOuterDiameter">Outer Diameter</dt><dd id="sumDiameter">0.000 cm</dd></div>
+              <div><dt data-i18n="lblThickness">Thickness</dt><dd id="sumThickness">0.000 cm</dd></div>
+              <div><dt data-i18n="lblCenterHole">Center Hole</dt><dd id="sumHole">0.000 cm</dd></div>
+              <div><dt data-i18n="lblDensity">Density</dt><dd id="sumDensity">0 kg/m³</dd></div>
+            </dl>
+          </div>
+        </section>
+
+        <p class="note">
+          <strong data-i18n="lblNoteTitle">Note:</strong>
+          <span data-i18n="lblNoteText">Gross weight includes casting allowance. Net weight is the finished part weight.</span>
+        </p>
+      </form>
+
+      <aside class="visual-panel" aria-label="Blueprint">
+        <p class="panel-label" data-i18n="blueprintTitle">Blueprint View</p>
+        <div class="blueprint-bg">
+          <svg id="svgView" class="plate-svg" role="img" aria-labelledby="blueprintDesc" preserveAspectRatio="xMidYMid meet">
+            <title id="blueprintDesc">Plate drawing</title>
+            <defs>
+              <radialGradient id="ironTop" cx="35%" cy="30%" r="75%">
+                <stop offset="0%" stop-color="#d1d5db"></stop>
+                <stop offset="24%" stop-color="#6b7280"></stop>
+                <stop offset="82%" stop-color="#2f3439"></stop>
+                <stop offset="100%" stop-color="#111315"></stop>
+              </radialGradient>
+              <linearGradient id="ironSide" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stop-color="#9ca3af"></stop>
+                <stop offset="48%" stop-color="#3f454b"></stop>
+                <stop offset="100%" stop-color="#15181b"></stop>
+              </linearGradient>
+              <filter id="plateShadow" x="-30%" y="-30%" width="160%" height="160%">
+                <feDropShadow dx="3" dy="5" stdDeviation="4" flood-color="#000000" flood-opacity="0.45"></feDropShadow>
+              </filter>
+            </defs>
+
+            <g id="topGroup">
+              <circle id="topPlate" fill="url(#ironTop)" stroke="#111315" stroke-width="1.5" filter="url(#plateShadow)"></circle>
+              <circle id="topHole" fill="#101214" stroke="#7dd3fc" stroke-width="0.6"></circle>
+              <line id="diameterLine" stroke="#7dd3fc" stroke-width="0.7" stroke-dasharray="2 2"></line>
+              <text id="diameterText" fill="#d7f7ff" font-family="Consolas, monospace" font-weight="700" text-anchor="middle"></text>
+              <text id="plateLabelText" fill="#f4f6f8" opacity="0.95" font-family="Arial, sans-serif" font-weight="900" text-anchor="middle"></text>
+            </g>
+
+            <g id="sideGroup">
+              <rect id="sidePlate" fill="url(#ironSide)" stroke="#111315" stroke-width="1.5" rx="2" filter="url(#plateShadow)"></rect>
+              <rect id="sideHole" fill="#101214" opacity="0.7"></rect>
+              <line id="thicknessMain" stroke="#7dd3fc" stroke-width="0.7"></line>
+              <line id="thicknessTop" stroke="#7dd3fc" stroke-width="0.5"></line>
+              <line id="thicknessBot" stroke="#7dd3fc" stroke-width="0.5"></line>
+              <text id="thicknessText" fill="#d7f7ff" font-family="Consolas, monospace" font-weight="700"></text>
+            </g>
+          </svg>
+        </div>
+
+        <section class="formula-panel" aria-label="Formulas">
+          <p><strong data-i18n="lblFormula">Formula:</strong> Mass = Density × Volume</p>
+          <p><strong data-i18n="lblFormulaSolid">Solid plate:</strong> V = π × h × R²</p>
+          <p><strong data-i18n="lblFormulaHole">With center hole:</strong> V = π × h × (R² - r²)</p>
+        </section>
+      </aside>
+    </div>
+  </main>
+</body>
+</html>
